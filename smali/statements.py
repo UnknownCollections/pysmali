@@ -1,12 +1,11 @@
 import re
 import warnings
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Iterable, List, Optional, Tuple, Type, Union
-
-from more_itertools import peekable
+from typing import Dict, List, Optional, Tuple, Type
 
 from smali.attributes import StatementAttributes
 from smali.exceptions import ParseError, ValidationError, ValidationWarning, WhitespaceWarning
+from smali.lib.peekable import Peekable
 from smali.literals import IntLiteral
 from smali.modifiers import EndModifiers, Modifiers
 from smali.qualifiers import Qualifier
@@ -25,7 +24,7 @@ class Statement(metaclass=ABCMeta):
     raw_line: str
     clean_line: str
     eol_comment: str
-    line_iter: Union[peekable, Iterable[str]]
+    line_iter: Peekable[str]
     modifiers: Optional[Modifiers]
     attributes: StatementAttributes
 
@@ -33,7 +32,7 @@ class Statement(metaclass=ABCMeta):
         self.raw_line = line.rstrip('\r\n')
         self.clean_line = self.raw_line.lstrip()
         self.parse_eol_comment()
-        self.line_iter = peekable(Statement.RE_SPACE_SPLIT.split(self.clean_line))
+        self.line_iter = Peekable(Statement.RE_SPACE_SPLIT.split(self.clean_line))
         self.modifiers = None
         self.parse_token()
         self.parse_modifiers()
@@ -140,6 +139,8 @@ class Statement(metaclass=ABCMeta):
             raise ParseError(f'{type(self).__name__} line not empty after parsing: {self.raw_line}')
 
     def finish_line(self):
+        if not self.VALIDATE:
+            return
         while self.line_iter:
             next(self.line_iter)
 

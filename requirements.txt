@@ -1,3 +1,0 @@
-tqdm~=4.59.0
-cryptography~=3.4.6
-more-itertools~=8.7.0

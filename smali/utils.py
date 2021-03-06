@@ -1,7 +1,5 @@
+import hashlib
 import re
-
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.hashes import MD5
 
 
 class ValidationComparison:
@@ -13,9 +11,7 @@ class ValidationComparison:
     @staticmethod
     def order_independent_hash(data: str) -> bytes:
         tokens = ''.join(sorted(filter(lambda x: not x.isspace(), list(data))))
-        hasher = hashes.Hash(MD5())
-        hasher.update(tokens.encode())
-        return hasher.finalize()
+        return hashlib.md5(tokens.encode()).digest()
 
     @staticmethod
     def normalize_smali(smali: str) -> str:
