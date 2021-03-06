@@ -2,7 +2,7 @@ import hashlib
 import re
 
 
-class ValidationComparison:
+class SmaliCompare:
     RE_FIND_COMMENTS = re.compile(r'(#.*)$', re.MULTILINE)
     RE_FIND_INDENTATION = re.compile(r'((^[ \t]+)|([ \t]+$))', re.MULTILINE)
     RE_FIND_OVERSIZED_WHITESPACE = re.compile(r'[\t ]{2,}')
@@ -15,11 +15,11 @@ class ValidationComparison:
 
     @staticmethod
     def normalize_smali(smali: str) -> str:
-        smali = ValidationComparison.RE_FIND_COMMENTS.sub('', smali)
-        smali = ValidationComparison.RE_FIND_INDENTATION.sub('', smali)
-        smali = ValidationComparison.RE_FIND_OVERSIZED_WHITESPACE.sub(' ', smali)
-        return ValidationComparison.RE_FIND_EXTRA_NEWLINES.sub('\n', smali)
+        smali = SmaliCompare.RE_FIND_COMMENTS.sub('', smali)
+        smali = SmaliCompare.RE_FIND_INDENTATION.sub('', smali)
+        smali = SmaliCompare.RE_FIND_OVERSIZED_WHITESPACE.sub(' ', smali)
+        return SmaliCompare.RE_FIND_EXTRA_NEWLINES.sub('\n', smali)
 
     @staticmethod
     def whitespace_normalized_equals(a: str, b: str) -> bool:
-        return ValidationComparison.normalize_smali(a) == ValidationComparison.normalize_smali(b)
+        return SmaliCompare.normalize_smali(a) == SmaliCompare.normalize_smali(b)

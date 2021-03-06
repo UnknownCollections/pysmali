@@ -6,11 +6,11 @@ from typing import Dict, List, Optional, Tuple, Type
 from smali.attributes import StatementAttributes
 from smali.exceptions import ParseError, ValidationError, ValidationWarning, WhitespaceWarning
 from smali.lib.peekable import Peekable
+from smali.lib.smali_compare import SmaliCompare
 from smali.literals import IntLiteral
 from smali.modifiers import EndModifiers, Modifiers
 from smali.qualifiers import Qualifier
 from smali.tokens import Annotation, ArrayData, Catch, CatchAll, Class, End, Enum, Field, Implements, Line, Local, Locals, Method, PackedSwitch, Param, Prologue, Registers, Restart, Source, SparseSwitch, Subannotation, Super, Token, Tokens, TokensLex
-from smali.utils import ValidationComparison
 
 
 class Statement(metaclass=ABCMeta):
@@ -146,9 +146,9 @@ class Statement(metaclass=ABCMeta):
 
     def validate(self):
         reconstructed = str(self)
-        if ValidationComparison.order_independent_hash(self.raw_line) != ValidationComparison.order_independent_hash(reconstructed):
+        if SmaliCompare.order_independent_hash(self.raw_line) != SmaliCompare.order_independent_hash(reconstructed):
             raise ValidationError(f'source line DOES NOT match reconstruction\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}')
-        elif not ValidationComparison.whitespace_normalized_equals(self.raw_line, reconstructed):
+        elif not SmaliCompare.whitespace_normalized_equals(self.raw_line, reconstructed):
             warnings.warn(ValidationWarning(f'source line might not match reconstruction\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}'))
         elif self.raw_line.lstrip() != reconstructed:
             warnings.warn(WhitespaceWarning(f'source line might have different whitespace\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}'))

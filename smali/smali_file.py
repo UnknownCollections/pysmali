@@ -4,8 +4,8 @@ from typing import Iterator, List
 from smali.attributes import StatementAttributes
 from smali.block import Block
 from smali.exceptions import FormatError, ParseError, ValidationError, ValidationWarning, WhitespaceWarning
+from smali.lib.smali_compare import SmaliCompare
 from smali.statements import Statement
-from smali.utils import ValidationComparison
 
 
 class SmaliFile:
@@ -129,9 +129,9 @@ class SmaliFile:
 
     def validate(self):
         reconstruction = str(self)
-        if ValidationComparison.order_independent_hash(self.raw_code) != ValidationComparison.order_independent_hash(reconstruction):
+        if SmaliCompare.order_independent_hash(self.raw_code) != SmaliCompare.order_independent_hash(reconstruction):
             raise ValidationError(f'{self.file_path} is NOT reconstructed correctly')
-        elif not ValidationComparison.whitespace_normalized_equals(self.raw_code, reconstruction):
+        elif not SmaliCompare.whitespace_normalized_equals(self.raw_code, reconstruction):
             warnings.warn(ValidationWarning(f'{self.file_path} might not be reconstructed correctly'))
         elif self.raw_code != reconstruction:
             warnings.warn(WhitespaceWarning(f'{self.file_path} might have different whitespace'))
