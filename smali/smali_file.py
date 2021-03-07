@@ -12,13 +12,11 @@ class SmaliFile:
     __version__ = None
     VALIDATE: bool = False
 
-    file_path: str
     raw_code: str
     lines: Iterator[str]
     root: Block
 
-    def __init__(self, file_path: str, smali_code: str):
-        self.file_path = file_path
+    def __init__(self, smali_code: str):
         self.raw_code = smali_code
         self.lines = smali_code.splitlines()
         self.root = Block()
@@ -30,7 +28,7 @@ class SmaliFile:
     def parse_file(cls, file_path: str) -> 'SmaliFile':
         with open(file_path, 'r') as f:
             smali_code = f.read()
-            return cls(file_path, smali_code)
+        return cls(smali_code)
 
     def __str__(self):
         result = []
@@ -130,8 +128,8 @@ class SmaliFile:
     def validate(self):
         reconstruction = str(self)
         if SmaliCompare.order_independent_hash(self.raw_code) != SmaliCompare.order_independent_hash(reconstruction):
-            raise ValidationError(f'{self.file_path} is NOT reconstructed correctly')
+            raise ValidationError(f'not reconstructed correctly')
         elif not SmaliCompare.whitespace_normalized_equals(self.raw_code, reconstruction):
-            warnings.warn(ValidationWarning(f'{self.file_path} might not be reconstructed correctly'))
-        elif self.raw_code != reconstruction:
-            warnings.warn(WhitespaceWarning(f'{self.file_path} might have different whitespace'))
+            warnings.warn(ValidationWarning(f'might not be reconstructed correctly'))
+        elif self.raw_code.rstrip() != reconstruction.rstrip():
+            warnings.warn(WhitespaceWarning(f'has different whitespace'))

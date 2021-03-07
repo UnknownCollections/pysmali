@@ -44,9 +44,9 @@ def main(targets: Optional[Set[str]] = None):
             files_progress.set_description(f'[W:{len(validation_warnings)}|E:{len(validation_errors)}|EX:{len(exceptions)}] {real_path[-30:]}')
 
             with io.TextIOWrapper(archive.extractfile(file)) as f:
-                raw_file = f.read().strip()
+                file_data = f.read()
                 try:
-                    SmaliFile(real_path, raw_file)
+                    SmaliFile(file_data)
                 except ValidationError as e:
                     if real_path not in validation_errors:
                         validation_errors[real_path] = []

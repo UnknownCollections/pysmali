@@ -18,7 +18,7 @@ class SmaliCompare:
         smali = SmaliCompare.RE_FIND_COMMENTS.sub('', smali)
         smali = SmaliCompare.RE_FIND_INDENTATION.sub('', smali)
         smali = SmaliCompare.RE_FIND_OVERSIZED_WHITESPACE.sub(' ', smali)
-        return SmaliCompare.RE_FIND_EXTRA_NEWLINES.sub('\n', smali)
+        return SmaliCompare.RE_FIND_EXTRA_NEWLINES.sub('\n', smali).rstrip()
 
     @staticmethod
     def whitespace_normalized_equals(a: str, b: str) -> bool:

@@ -1,7 +1,7 @@
 import re
 import warnings
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Optional, Tuple, Type
+from typing import Dict, List, Optional, Tuple, Type, Union, Iterable
 
 from smali.attributes import StatementAttributes
 from smali.exceptions import ParseError, ValidationError, ValidationWarning, WhitespaceWarning
@@ -96,7 +96,9 @@ class Statement(metaclass=ABCMeta):
             return [BodyStatement(line)]
 
     @classmethod
-    def parse_lines(cls, lines: List[str]) -> List['Statement']:
+    def parse_lines(cls, lines: Union[Iterable[str]]) -> List['Statement']:
+        if isinstance(lines, str):
+            lines = lines.splitlines(keepends=False)
         result = []
         for line in lines:
             result.extend(cls.parse_line(line))
@@ -147,11 +149,11 @@ class Statement(metaclass=ABCMeta):
     def validate(self):
         reconstructed = str(self)
         if SmaliCompare.order_independent_hash(self.raw_line) != SmaliCompare.order_independent_hash(reconstructed):
-            raise ValidationError(f'source line DOES NOT match reconstruction\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}')
+            raise ValidationError(f'source line does not match reconstruction\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}')
         elif not SmaliCompare.whitespace_normalized_equals(self.raw_line, reconstructed):
             warnings.warn(ValidationWarning(f'source line might not match reconstruction\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}'))
         elif self.raw_line.lstrip() != reconstructed:
-            warnings.warn(WhitespaceWarning(f'source line might have different whitespace\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}'))
+            warnings.warn(WhitespaceWarning(f'source line has different whitespace\n\t[SOURCE] {self.raw_line.lstrip()}\n\t[PARSED] {str(self)}'))
 
     @property
     def token(self) -> Optional[Type[Token]]:
