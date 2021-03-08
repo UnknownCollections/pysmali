@@ -137,19 +137,19 @@ class SmaliFile:
     def find(self, stmt_type: Type[StatementType], **attributes) -> List[BlockItemType]:
         return self.root.find(stmt_type, **attributes)
 
-    def find_methods(self, method_name: str) -> List[MethodStatement]:
-        return self.root.find(MethodStatement, method_name=method_name)
+    def find_methods(self, method_name: str) -> List[Block[MethodStatement]]:
+        return self.root.find(MethodStatement, member_name=method_name)
 
-    def find_method(self, method_name: str, method_prototype: str) -> Optional[Block]:
+    def find_method(self, method_name: str, method_prototype: str) -> Optional[Block[MethodStatement]]:
         method_parts = MethodStatement.RE_METHOD_PROTOTYPE.fullmatch(method_prototype)
         if method_parts is None:
             raise Exception('invalid method prototype')
-        result = self.root.find(MethodStatement, method_name=method_name, method_params=method_parts.group(1), method_result_type=method_parts.group(2))
+        result = self.root.find(MethodStatement, member_name=method_name, method_params=method_parts.group(1), method_result_type=method_parts.group(2))
         if len(result) == 0:
             return None
         return result[0]
 
-    def find_field(self, field_name: str) -> Optional[Union[Block, FieldStatement]]:
+    def find_field(self, field_name: str) -> Optional[Union[Block[FieldStatement], FieldStatement]]:
         result = self.root.find(FieldStatement, member_name=field_name)
         if len(result) == 0:
             return None

@@ -1,7 +1,5 @@
 # Testing PySmali
 
-PySmali does not yet have conventional unit tests.
-
 Currently, testing is done by parsing and unparsing smali files and comparing the original to the reconstructed.
 
 There are four levels of results when comparing the original and reconstructed smali files:
@@ -24,14 +22,8 @@ When making pull requests with additional tests, **DO NOT** include the `src/` f
 ## Requirements
 
 * Python 3.8 or newer
-* `tqdm~=4.59.0`
 
-## OSS Attribution
-
-### [tqdm/tqdm](https://github.com/tqdm/tqdm) by **Multiple contributors**  
-_Licensed Under: [Various Licenses](https://github.com/tqdm/tqdm/blob/master/LICENCE)_
-
-### Tests
+## Test Files Attribution
 
 Smali files used as tests in the `tests.tar.xz` archive have been obtained from the following projects:
 - Android

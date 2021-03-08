@@ -475,7 +475,7 @@ class LocalsStatement(Statement):
 
 
 class MethodStatement(Statement):
-    RE_METHOD_PROTOTYPE = re.compile(r'^(.*?)\((.*)\)(.*)$')
+    RE_METHOD_PROTOTYPE = re.compile(r'^\((.*)\)(.*)$')
     RE_METHOD = re.compile(r'^(.*?)\((.*)\)(.*)$')
     member_name: str
     method_params: str

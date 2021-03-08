@@ -1,10 +1,7 @@
-import binascii
 import glob
+import hashlib
 import os
 import tarfile
-
-from cryptography.hazmat.primitives import hashes
-from cryptography.hazmat.primitives.hashes import SHA256
 
 
 def main():
@@ -16,10 +13,8 @@ def main():
         created_files = set(archive.getnames())
         for file in glob.iglob(glob_path, recursive=True):
             print(f'Adding {file}...')
-            with open(file, 'rb') as f:
-                digest = hashes.Hash(SHA256())
-                digest.update(f.read())
-                new_file_name = binascii.hexlify(digest.finalize()).decode()
+            with open(file, 'r') as f:
+                new_file_name = hashlib.sha256(f.read()).hexdigest()
                 if new_file_name in created_files:
                     print('\t...file already added')
                 created_files.add(new_file_name)

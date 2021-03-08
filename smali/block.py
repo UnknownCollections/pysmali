@@ -1,14 +1,13 @@
-from turtledemo.sorting_animate import Block
-from typing import List, Union, Type, NewType
+from typing import List, Union, Type, NewType, Generic
 
 from smali.exceptions import FormatError
 from smali.statements import Statement, StatementType
 
 BlockItem = NewType('BlockItem', Union[Statement, 'Block'])
-BlockItemType = NewType('BlockItemType', Union[StatementType, 'Block'])
+BlockItemType = NewType('BlockItemType', Union[StatementType, 'Block[StatementType]'])
 
 
-class Block:
+class Block(Generic[StatementType]):
     INDENT_SIZE = 4
     INDENT_CHAR = ' '
 
@@ -24,15 +23,11 @@ class Block:
         self.items.extend(items)
 
     @property
-    def head(self) -> Statement:
+    def head(self) -> StatementType:
         if isinstance(self.items[0], Statement):
             return self.items[0]
         else:
             return self.items[0].head
-
-    @property
-    def type(self) -> Type[Statement]:
-        return self.items[0].type
 
     def flatten(self) -> List[Statement]:
         result = []
@@ -48,7 +43,9 @@ class Block:
     @staticmethod
     def _match_item(item: Statement, **attributes) -> bool:
         for key, value in attributes.items():
-            if hasattr(item, key) and getattr(item, key) != value:
+            if not hasattr(item, key):
+                return False
+            if getattr(item, key) != value:
                 return False
         return True
 
@@ -58,7 +55,8 @@ class Block:
             if isinstance(item, Block):
                 if isinstance(item.head, stmt_type) and Block._match_item(item.head, **kwargs):
                     result.append(item)
-                result.extend(item.find(stmt_type, **kwargs))
+                else:
+                    result.extend(item.find(stmt_type, **kwargs))
             elif isinstance(item, stmt_type) and Block._match_item(item, **kwargs):
                 result.append(item)
         return result
