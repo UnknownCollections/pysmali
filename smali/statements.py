@@ -1,7 +1,7 @@
 import re
 import warnings
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Optional, Tuple, Type, Union, Iterable
+from typing import Dict, List, Optional, Tuple, Type, Union, Iterable, TypeVar
 
 from smali.attributes import StatementAttributes
 from smali.exceptions import ParseError, ValidationError, ValidationWarning, WhitespaceWarning
@@ -176,6 +176,9 @@ class Statement(metaclass=ABCMeta):
     @abstractmethod
     def __str__(self):
         raise NotImplementedError
+
+
+StatementType = TypeVar('StatementType', bound=Statement)
 
 
 class BlankStatement(Statement):
@@ -472,6 +475,7 @@ class LocalsStatement(Statement):
 
 
 class MethodStatement(Statement):
+    RE_METHOD_PROTOTYPE = re.compile(r'^(.*?)\((.*)\)(.*)$')
     RE_METHOD = re.compile(r'^(.*?)\((.*)\)(.*)$')
     member_name: str
     method_params: str
@@ -492,11 +496,15 @@ class MethodStatement(Statement):
     def block_ends_with(self) -> Optional[Tuple[Type['Statement'], Optional[Modifiers]]]:
         return EndStatement, EndModifiers.METHOD
 
+    @property
+    def prototype(self) -> str:
+        return f'({self.method_params}){self.method_result_type}'
+
     def __str__(self):
         if self.modifiers is not None:
-            return f'{self.descriptor} {self.modifiers} {self.member_name}({self.method_params}){self.method_result_type}{self.eol_comment}'
+            return f'{self.descriptor} {self.modifiers} {self.member_name}{self.prototype}{self.eol_comment}'
         else:
-            return f'{self.descriptor} {self.member_name}({self.method_params}){self.method_result_type}{self.eol_comment}'
+            return f'{self.descriptor} {self.member_name}{self.prototype}{self.eol_comment}'
 
 
 class PackedSwitchStatement(Statement):

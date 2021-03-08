@@ -1,11 +1,11 @@
 import warnings
-from typing import Iterator, List
+from typing import Iterator, List, Optional, Union, Type
 
 from smali.attributes import StatementAttributes
-from smali.block import Block
+from smali.block import Block, BlockItemType
 from smali.exceptions import FormatError, ParseError, ValidationError, ValidationWarning, WhitespaceWarning
 from smali.lib.smali_compare import SmaliCompare
-from smali.statements import Statement
+from smali.statements import Statement, MethodStatement, FieldStatement, StatementType
 
 
 class SmaliFile:
@@ -73,7 +73,7 @@ class SmaliFile:
             elif bool(statement.attributes & StatementAttributes.BLOCK_END):
                 # A block is ending, finish it
                 finished_block = stack.pop()
-                if finished_block.type.block_ends_with != (type(statement), statement.modifiers):
+                if finished_block.head.block_ends_with != (type(statement), statement.modifiers):
                     raise ParseError('block end does not match block start')
                 finished_block.append(statement)
                 # If there are more blocks on the stack, this block appends to that
@@ -133,3 +133,24 @@ class SmaliFile:
             warnings.warn(ValidationWarning(f'might not be reconstructed correctly'))
         elif self.raw_code.rstrip() != reconstruction.rstrip():
             warnings.warn(WhitespaceWarning(f'has different whitespace'))
+
+    def find(self, stmt_type: Type[StatementType], **attributes) -> List[BlockItemType]:
+        return self.root.find(stmt_type, **attributes)
+
+    def find_methods(self, method_name: str) -> List[MethodStatement]:
+        return self.root.find(MethodStatement, method_name=method_name)
+
+    def find_method(self, method_name: str, method_prototype: str) -> Optional[Block]:
+        method_parts = MethodStatement.RE_METHOD_PROTOTYPE.fullmatch(method_prototype)
+        if method_parts is None:
+            raise Exception('invalid method prototype')
+        result = self.root.find(MethodStatement, method_name=method_name, method_params=method_parts.group(1), method_result_type=method_parts.group(2))
+        if len(result) == 0:
+            return None
+        return result[0]
+
+    def find_field(self, field_name: str) -> Optional[Union[Block, FieldStatement]]:
+        result = self.root.find(FieldStatement, member_name=field_name)
+        if len(result) == 0:
+            return None
+        return result[0]
